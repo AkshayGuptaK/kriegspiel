@@ -6,7 +6,7 @@
     "outDir": "dist",
     "sourceMap": true,
     "resolveJsonModule": true,
-    "lib": ["esnext"],
+    "lib": ["esnext", "DOM"],
     "esModuleInterop": true
   },
   "include": ["src/**/*.ts"],
