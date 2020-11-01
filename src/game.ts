@@ -9,14 +9,14 @@ class Game {
 
   private static makeArmy(color: Color, pieceRank: PosRank, pawnRank: PosRank) {
     return [
-      new King(color, 'E', pieceRank),
-      new Queen(color, 'D', pieceRank),
       new Rook(color, 'A', pieceRank),
-      new Rook(color, 'H', pieceRank),
-      new Bishop(color, 'C', pieceRank),
-      new Bishop(color, 'F', pieceRank),
       new Knight(color, 'B', pieceRank),
+      new Bishop(color, 'C', pieceRank),
+      new Queen(color, 'D', pieceRank),
+      new King(color, 'E', pieceRank),
+      new Bishop(color, 'F', pieceRank),
       new Knight(color, 'G', pieceRank),
+      new Rook(color, 'H', pieceRank),
       ...this.makePawns(color, pawnRank),
     ];
   }
@@ -54,15 +54,43 @@ class King extends Piece {
   }
 }
 
-class Queen extends Piece {}
+class Queen extends Piece {
+  canMoveTo(position: Position) {
+    let distance = this.position.distanceFrom(position);
+    return distance.rank < 2 && distance.file < 2;
+  }
+}
 
-class Rook extends Piece {}
+class Rook extends Piece {
+  canMoveTo(position: Position) {
+    let distance = this.position.distanceFrom(position);
+    return distance.rank == 0 || distance.file == 0;
+  }
+}
 
-class Bishop extends Piece {}
+class Bishop extends Piece {
+  canMoveTo(position: Position) {
+    let distance = this.position.distanceFrom(position);
+    return distance.rank == distance.file;
+  }
+}
 
-class Knight extends Piece {}
+class Knight extends Piece {
+  canMoveTo(position: Position) {
+    let distance = this.position.distanceFrom(position);
+    return (
+      (distance.rank == 1 || distance.rank == 2) &&
+      distance.file == 3 - distance.rank
+    );
+  }
+}
 
-class Pawn extends Piece {}
+class Pawn extends Piece {
+  canMoveTo(position: Position) {
+    let distance = this.position.distanceFrom(position);
+    return distance.rank < 2 && distance.file < 2;
+  }
+}
 
 type Color = 'Black' | 'White';
 type PosFile = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H';
