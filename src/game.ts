@@ -88,7 +88,7 @@ class Knight extends Piece {
 class Pawn extends Piece {
   canMoveTo(position: Position) {
     let distance = this.position.distanceFrom(position);
-    return distance.rank < 2 && distance.file < 2;
+    return distance.rank < 2 && distance.file < 2; // needs implementing
   }
 }
 
