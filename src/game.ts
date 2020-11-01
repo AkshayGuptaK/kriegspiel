@@ -1,4 +1,30 @@
-class Game {}
+class Game {
+  private pieces = Game.makePieces();
+
+  private static makePawns(color: Color, pawnRank: PosRank) {
+    return ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map(
+      (file: PosFile) => new Pawn(color, file, pawnRank)
+    );
+  }
+
+  private static makeArmy(color: Color, pieceRank: PosRank, pawnRank: PosRank) {
+    return [
+      new King(color, 'E', pieceRank),
+      new Queen(color, 'D', pieceRank),
+      new Rook(color, 'A', pieceRank),
+      new Rook(color, 'H', pieceRank),
+      new Bishop(color, 'C', pieceRank),
+      new Bishop(color, 'F', pieceRank),
+      new Knight(color, 'B', pieceRank),
+      new Knight(color, 'G', pieceRank),
+      ...this.makePawns(color, pawnRank),
+    ];
+  }
+
+  private static makePieces() {
+    return [...this.makeArmy('White', 1, 2), ...this.makeArmy('Black', 8, 7)];
+  }
+}
 
 class Position {
   constructor(private file: PosFile, private rank: PosRank) {}
@@ -38,6 +64,6 @@ class Knight extends Piece {}
 
 class Pawn extends Piece {}
 
-type Color = "Black" | "White";
-type PosFile = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H";
+type Color = 'Black' | 'White';
+type PosFile = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H';
 type PosRank = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
