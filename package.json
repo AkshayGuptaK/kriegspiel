@@ -1,0 +1,24 @@
+{
+  "name": "kriegspiel",
+  "version": "1.0.0",
+  "description": "Command line implementation of the kriegspiel chess variant",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AkshayGuptaK/kriegspiel.git"
+  },
+  "keywords": [
+    "chess",
+    "kriegspiel",
+    "typescript"
+  ],
+  "author": "AkshayGuptaK",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AkshayGuptaK/kriegspiel/issues"
+  },
+  "homepage": "https://github.com/AkshayGuptaK/kriegspiel#readme"
+}
