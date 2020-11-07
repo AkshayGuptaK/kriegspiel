@@ -19,9 +19,17 @@ export class Game {
   }
 
   async playTurn(): Promise<void> {
-    const { from, to, confirm } = await promptMove(this.currentPlayer);
+    const response = await promptMove(this.currentPlayer);
+    const { from, to, confirm } = response.confirm;
     if (!confirm) return;
-    // assuming valid move
+    const piece = this.board.findPieceAt(this.currentPlayer, from);
+    if (!piece)
+      return console.log('You do not control any piece at that position');
+    if (!piece.canMoveTo(to))
+      return console.log(`Your ${piece.name} cannot move there`);
+    // check for if move is obstructed
+    piece.moveTo(to);
+    // check if capture is effected
     this.currentPlayer == 'white'
       ? (this.currentPlayer = 'black')
       : ((this.currentPlayer = 'white'), this.turn++);

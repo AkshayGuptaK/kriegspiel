@@ -1,9 +1,13 @@
 import prompts, { Answers } from 'prompts';
 import { Color } from './piece';
-import { isFile, isRank } from './position';
+import { isFile, isRank, PosFile, Position, PosRank } from './position';
 
 function isValidSquare(square: string): boolean {
   return isFile(square[0]) && isRank(parseInt(square[1]));
+}
+
+function parseSquareString(square: string): Position {
+  return new Position(square[0] as PosFile, parseInt(square[1]) as PosRank);
 }
 
 export async function promptMove(
@@ -28,6 +32,13 @@ export async function promptMove(
       name: 'confirm',
       message: (_, values) =>
         `Confirm move piece at ${values['from']} to ${values['to']}?`,
+      format: (prev, values) => {
+        return {
+          from: parseSquareString(values['from']),
+          to: parseSquareString(values['to']),
+          confirm: prev,
+        };
+      },
     },
   ]);
   return response;

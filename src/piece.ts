@@ -11,10 +11,16 @@ export abstract class Piece {
   moveTo(position: Position): void {
     this.position = position;
   }
+  isAt(position: Position): boolean {
+    const distance = this.position.distanceFrom(position);
+    return !(distance.rank + distance.file);
+  }
   abstract canMoveTo(position: Position): boolean;
+  abstract name: string;
 }
 
 export class King extends Piece {
+  name = 'king';
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
     return distance.rank < 2 && distance.file < 2;
@@ -22,6 +28,7 @@ export class King extends Piece {
 }
 
 export class Queen extends Piece {
+  name = 'queen';
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
     return distance.rank < 2 && distance.file < 2;
@@ -29,6 +36,7 @@ export class Queen extends Piece {
 }
 
 export class Rook extends Piece {
+  name = 'rook';
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
     return distance.rank == 0 || distance.file == 0;
@@ -36,6 +44,7 @@ export class Rook extends Piece {
 }
 
 export class Bishop extends Piece {
+  name = 'bishop';
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
     return distance.rank == distance.file;
@@ -43,6 +52,7 @@ export class Bishop extends Piece {
 }
 
 export class Knight extends Piece {
+  name = 'knight';
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
     return (
@@ -53,6 +63,7 @@ export class Knight extends Piece {
 }
 
 export class Pawn extends Piece {
+  name = 'pawn';
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
     return distance.rank < 2 && distance.file < 2; // needs implementing

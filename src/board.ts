@@ -1,4 +1,4 @@
-import { files, PosRank, PosFile } from './position';
+import { files, PosRank, PosFile, Position } from './position';
 import { Color, Piece, Rook, Knight, King, Queen, Pawn, Bishop } from './piece';
 
 export class Board {
@@ -30,5 +30,9 @@ export class Board {
       white: this.makeArmy('white', 1, 2),
       black: this.makeArmy('black', 8, 7),
     };
+  }
+
+  findPieceAt(color: Color, position: Position): Piece {
+    return this.pieces[color].filter((piece) => piece.isAt(position))[0];
   }
 }
