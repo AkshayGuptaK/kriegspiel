@@ -1,14 +1,14 @@
 import { literalArray } from './type-utils';
 
 export const files = literalArray<string>()([
-  'A',
-  'B',
-  'C',
-  'D',
-  'E',
-  'F',
-  'G',
-  'H',
+  'a',
+  'b',
+  'c',
+  'd',
+  'e',
+  'f',
+  'g',
+  'h',
 ]);
 export const ranks = literalArray<number>()([1, 2, 3, 4, 5, 6, 7, 8]);
 export type PosFile = typeof files[number];

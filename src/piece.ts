@@ -1,14 +1,14 @@
 import { Position, PosFile, PosRank } from './position';
 
-export type Color = 'Black' | 'White';
+export type Color = 'black' | 'white';
 
-abstract class Piece {
+export abstract class Piece {
   protected position: Position;
   constructor(private readonly color: Color, file: PosFile, rank: PosRank) {
     this.position = new Position(file, rank);
     this.color = color;
   }
-  moveTo(position: Position) {
+  moveTo(position: Position): void {
     this.position = position;
   }
   abstract canMoveTo(position: Position): boolean;

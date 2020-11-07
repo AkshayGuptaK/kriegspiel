@@ -1,28 +1,29 @@
-import { files, PosRank, PosFile } from './position';
-import { Color, Rook, Knight, King, Queen, Pawn, Bishop } from './piece';
+import { Board } from './board';
+import { Color } from './piece';
+import { promptMove } from './prompt';
 
 export class Game {
-  private pieces = Game.makePieces();
+  private turn = 1;
+  private currentPlayer: Color = 'white';
+  private board: Board;
+  private checkmate = false;
 
-  private static makePawns(color: Color, pawnRank: PosRank) {
-    return files.map((file: PosFile) => new Pawn(color, file, pawnRank));
+  constructor() {
+    this.board = new Board();
   }
 
-  private static makeArmy(color: Color, pieceRank: PosRank, pawnRank: PosRank) {
-    return [
-      new Rook(color, 'A', pieceRank),
-      new Knight(color, 'B', pieceRank),
-      new Bishop(color, 'C', pieceRank),
-      new Queen(color, 'D', pieceRank),
-      new King(color, 'E', pieceRank),
-      new Bishop(color, 'F', pieceRank),
-      new Knight(color, 'G', pieceRank),
-      new Rook(color, 'H', pieceRank),
-      ...this.makePawns(color, pawnRank),
-    ];
+  async play(): Promise<void> {
+    while (!this.checkmate) {
+      await this.playTurn();
+    }
   }
 
-  private static makePieces() {
-    return [...this.makeArmy('White', 1, 2), ...this.makeArmy('Black', 8, 7)];
+  async playTurn(): Promise<void> {
+    const { from, to, confirm } = await promptMove(this.currentPlayer);
+    if (!confirm) return;
+    // assuming valid move
+    this.currentPlayer == 'white'
+      ? (this.currentPlayer = 'black')
+      : ((this.currentPlayer = 'white'), this.turn++);
   }
 }

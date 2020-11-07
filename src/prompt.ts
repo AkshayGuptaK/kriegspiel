@@ -1,16 +1,34 @@
-import prompts from 'prompts';
+import prompts, { Answers } from 'prompts';
+import { Color } from './piece';
+import { isFile, isRank } from './position';
 
-function validateMoveInput(move: string): string | boolean {
-  // the last char is the rank, the prev is the file
-  // info before that is related to the piece
-  return move;
+function isValidSquare(square: string): boolean {
+  return isFile(square[0]) && isRank(parseInt(square[1]));
 }
 
-async () => {
-  const response = await prompts({
-    type: 'text',
-    name: 'move',
-    message: 'What is your next move?',
-    validate: validateMoveInput,
-  });
-};
+export async function promptMove(
+  color: Color
+): Promise<Answers<'confirm' | 'from' | 'to'>> {
+  console.log(`It is ${color}'s turn to move.`);
+  const response = await prompts([
+    {
+      type: 'text',
+      name: 'from',
+      message: 'What is the position of the piece you want to move?',
+      validate: isValidSquare,
+    },
+    {
+      type: 'text',
+      name: 'to',
+      message: 'What is the position you want to move it to?',
+      validate: isValidSquare,
+    },
+    {
+      type: 'confirm',
+      name: 'confirm',
+      message: (_, values) =>
+        `Confirm move piece at ${values['from']} to ${values['to']}?`,
+    },
+  ]);
+  return response;
+}
