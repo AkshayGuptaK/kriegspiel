@@ -18,3 +18,7 @@ export function zip<T, U>(arr1: T[], arr2: U[]): [T, U][] {
     throw Error('Zip arrays must be of matching length');
   return arr1.map((val, index) => [val, arr2[index]]);
 }
+
+export function removeItemFromArray<T>(arr: T[], item: T): T[] {
+  return arr.splice(arr.indexOf(item), 1);
+}

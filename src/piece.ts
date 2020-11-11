@@ -3,6 +3,10 @@ import { Position, PosFile, PosRank } from './position';
 
 export type Color = 'black' | 'white';
 
+export function getOtherColor(color: Color): Color {
+  return color == 'white' ? 'black' : 'white';
+}
+
 export abstract class Piece {
   protected position: Position;
   constructor(private readonly color: Color, file: PosFile, rank: PosRank) {
