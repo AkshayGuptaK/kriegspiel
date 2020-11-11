@@ -1,3 +1,4 @@
+import autoBind from 'auto-bind';
 import { Position, PosFile, PosRank } from './position';
 
 export type Color = 'black' | 'white';
@@ -6,17 +7,17 @@ export abstract class Piece {
   protected position: Position;
   constructor(private readonly color: Color, file: PosFile, rank: PosRank) {
     this.position = new Position(file, rank);
-    this.color = color;
+    autoBind(this);
   }
   moveTo(position: Position): void {
     this.position = position;
   }
   isAt(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
-    return !(distance.rank + distance.file);
+    return distance.rank + distance.file == 0;
   }
   abstract canMoveTo(position: Position): boolean;
-  abstract name: string;
+  abstract readonly name: string;
 }
 
 export class King extends Piece {

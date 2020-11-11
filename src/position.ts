@@ -1,3 +1,4 @@
+import autoBind from 'auto-bind';
 import { literalArray } from './type-utils';
 import { getNextElementsOfArray, zip } from './utils';
 
@@ -29,7 +30,9 @@ interface Distance {
 }
 
 export class Position {
-  constructor(private file: PosFile, private rank: PosRank) {}
+  constructor(private file: PosFile, private rank: PosRank) {
+    autoBind(this);
+  }
 
   distanceFrom(position: Position): Distance {
     return {

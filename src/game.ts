@@ -1,3 +1,4 @@
+import autoBind from 'auto-bind';
 import { Board } from './board';
 import { Color } from './piece';
 import { promptMove } from './prompt';
@@ -10,6 +11,7 @@ export class Game {
 
   constructor() {
     this.board = new Board();
+    autoBind(this);
   }
 
   async play(): Promise<void> {

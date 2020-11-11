@@ -1,3 +1,4 @@
+import autoBind from 'auto-bind';
 import { files, PosRank, PosFile, Position } from './position';
 import { Color, Piece, Rook, Knight, King, Queen, Pawn, Bishop } from './piece';
 import { identity } from './utils';
@@ -6,6 +7,7 @@ export class Board {
   private pieces: { white: Piece[]; black: Piece[] };
   constructor() {
     this.pieces = this.makePieces();
+    autoBind(this);
   }
 
   private makePawns(color: Color, pawnRank: PosRank) {
