@@ -8,7 +8,7 @@ export function getOtherColor(color: Color): Color {
 }
 
 export abstract class Piece {
-  private position: Position;
+  protected position: Position;
   constructor(protected readonly color: Color, file: PosFile, rank: PosRank) {
     this.position = new Position(file, rank);
     autoBind(this);
@@ -119,6 +119,14 @@ export class Pawn extends Piece {
       Math.abs(vector.rank) <= 1 + extraMoveDistance &&
       vector.file == 0
     );
+  }
+
+  canCapture(position: Position): boolean {
+    const vector = this.position.vectorTo(position);
+    const distance = this.position.distanceFrom(position);
+    const isMovingInRightDirection =
+      this.color == 'white' ? vector.rank > 0 : vector.rank < 0;
+    return isMovingInRightDirection && distance.rank == 1 && distance.file == 1;
   }
 
   moveTo(position: Position): void {

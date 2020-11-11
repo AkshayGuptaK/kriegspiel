@@ -77,13 +77,15 @@ export class Board {
     return false;
   }
 
-  checkCapture(player: Color, to: Position): void {
+  checkCapture(player: Color, to: Position): boolean {
     const opponent = getOtherColor(player);
     const capturedPiece = this.findPieceAt(opponent, to);
     if (capturedPiece) {
       console.log(`Capture at ${to.toString()}`);
       this.capture(opponent, capturedPiece);
+      return true;
     }
+    return false;
   }
 
   tryMove(player: Color, from: Position, to: Position): boolean {
@@ -95,6 +97,14 @@ export class Board {
     if (!piece.canMoveTo(to)) {
       if (piece instanceof King) {
         return this.tryCastle(player, piece, to);
+      }
+      if (
+        piece instanceof Pawn &&
+        piece.canCapture(to) &&
+        this.checkCapture(player, to)
+      ) {
+        piece.moveTo(to);
+        return true;
       }
       console.log(`Your ${piece.name} cannot move there`);
       return false;
@@ -128,3 +138,7 @@ export class Board {
     return false;
   }
 }
+
+// en passant
+// check
+// checkmate
