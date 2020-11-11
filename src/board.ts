@@ -12,6 +12,7 @@ import {
   Bishop,
   isRook,
 } from './piece';
+import { Move, MoveData } from './history';
 import { identity, removeItemFromArray } from './utils';
 
 export class Board {
@@ -60,8 +61,17 @@ export class Board {
     return path.map(this.isPieceAt).some(identity);
   }
 
-  capture(color: Color, piece: Piece): void {
+  capture(color: Color, piece: Piece, to: Position): void {
+    console.log(
+      this.pieces[color].map((piece) => piece.getPosition().toString()),
+      'army before'
+    );
     this.pieces[color] = removeItemFromArray(this.pieces[color], piece);
+    console.log(
+      this.pieces[color].map((piece) => piece.getPosition().toString()),
+      'army after'
+    );
+    console.log(`Capture at ${to.toString()}`);
   }
 
   isObstructed(player: Color, from: Position, to: Position): boolean {
@@ -81,18 +91,33 @@ export class Board {
     const opponent = getOtherColor(player);
     const capturedPiece = this.findPieceAt(opponent, to);
     if (capturedPiece) {
-      console.log(`Capture at ${to.toString()}`);
-      this.capture(opponent, capturedPiece);
+      this.capture(opponent, capturedPiece, to);
       return true;
     }
     return false;
   }
 
-  tryMove(player: Color, from: Position, to: Position): boolean {
+  checkPawnCapture(player: Color, to: Position, previousMove: Move): boolean {
+    const normalCapture = this.checkCapture(player, to);
+    if (normalCapture) return true;
+    if (previousMove.isDoublePawnMove() && previousMove.isInMovePath(to)) {
+      const opponent = getOtherColor(player);
+      this.capture(opponent, previousMove.getMovingPiece(), to);
+      return true;
+    }
+    return false;
+  }
+
+  tryMove(
+    player: Color,
+    from: Position,
+    to: Position,
+    previousMove: Move
+  ): MoveData | void {
     const piece = this.findPieceAt(player, from);
     if (!piece) {
       console.log('You do not control any piece at that position');
-      return false;
+      return;
     }
     if (!piece.canMoveTo(to)) {
       if (piece instanceof King) {
@@ -101,23 +126,23 @@ export class Board {
       if (
         piece instanceof Pawn &&
         piece.canCapture(to) &&
-        this.checkCapture(player, to)
+        this.checkPawnCapture(player, to, previousMove)
       ) {
         piece.moveTo(to);
-        return true;
+        return [player, piece, from, to];
       }
       console.log(`Your ${piece.name} cannot move there`);
-      return false;
+      return;
     }
     if (this.isObstructed(player, from, to)) {
-      return false;
+      return;
     }
     this.checkCapture(player, to);
     piece.moveTo(to);
-    return true;
+    return [player, piece, from, to];
   }
 
-  tryCastle(player: Color, king: King, to: Position): boolean {
+  tryCastle(player: Color, king: King, to: Position): MoveData | void {
     if (king.canCastleTo(to)) {
       const rookTo = to.isQueenSide() ? to.getRightOf() : to.getLeftOf();
       const rooks = this.pieces[player].filter(isRook);
@@ -127,18 +152,14 @@ export class Board {
           this.isObstructed(player, king.getPosition(), to) ||
           this.isObstructed(player, castlingRook.getPosition(), rookTo)
         ) {
-          return false;
+          return;
         }
         king.moveTo(to);
         castlingRook.moveTo(rookTo);
-        return true;
+        return [player, king, king.getPosition(), to];
       }
     }
     console.log(`Your ${king.name} cannot move there`);
-    return false;
+    return;
   }
 }
-
-// en passant
-// check
-// checkmate

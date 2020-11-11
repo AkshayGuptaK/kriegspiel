@@ -21,10 +21,11 @@ export abstract class Piece {
   moveTo(position: Position): void {
     this.position = position;
   }
+
   isAt(position: Position): boolean {
-    const distance = this.position.distanceFrom(position);
-    return distance.rank + distance.file == 0;
+    return this.position.isSamePosition(position);
   }
+
   abstract canMoveTo(position: Position): boolean;
   abstract readonly name: string;
 }

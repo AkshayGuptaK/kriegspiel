@@ -41,6 +41,11 @@ export class Position {
     };
   }
 
+  isSamePosition(position: Position): boolean {
+    const vector = this.vectorTo(position);
+    return vector.rank == 0 && vector.file == 0;
+  }
+
   getLeftOf(by = 1): Position {
     return new Position(files[files.indexOf(this.file) - by], this.rank);
   }
