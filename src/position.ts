@@ -1,6 +1,6 @@
 import autoBind from 'auto-bind';
 import { literalArray } from './type-utils';
-import { getNextElementsOfArray, zip } from './utils';
+import { getElementsInBetween, zip } from './utils';
 
 export const files = literalArray<string>()([
   'a',
@@ -34,31 +34,43 @@ export class Position {
     autoBind(this);
   }
 
-  distanceFrom(position: Position): Distance {
+  private vectorFrom(position: Position): Distance {
     return {
-      rank: Math.abs(position.rank - this.rank),
-      file: Math.abs(position.file.charCodeAt(0) - this.file.charCodeAt(0)),
+      rank: position.rank - this.rank,
+      file: position.file.charCodeAt(0) - this.file.charCodeAt(0),
+    };
+  }
+
+  distanceFrom(position: Position): Distance {
+    const vector = this.vectorFrom(position);
+    return {
+      rank: Math.abs(vector.rank),
+      file: Math.abs(vector.file),
     };
   }
 
   pathTo(position: Position): Position[] {
     const distance = this.distanceFrom(position);
-    if (distance.rank == 0 && distance.file > 1) {
-      return getNextElementsOfArray(distance.file - 1, files, this.file).map(
+    if (distance.rank == distance.file) {
+      return zip(
+        getElementsInBetween(files, this.file, position.file),
+        getElementsInBetween(ranks, this.rank, position.rank)
+      ).map((pos) => new Position(...pos));
+    }
+    if (distance.file > 0) {
+      return getElementsInBetween(files, this.file, position.file).map(
         (file) => new Position(file, this.rank)
       );
     }
-    if (distance.file == 0 && distance.rank > 1) {
-      return getNextElementsOfArray(distance.rank - 1, ranks, this.rank).map(
+    if (distance.rank > 0) {
+      return getElementsInBetween(ranks, this.rank, position.rank).map(
         (rank) => new Position(this.file, rank)
       );
     }
-    if (distance.rank == distance.file && distance.rank > 1) {
-      return zip(
-        getNextElementsOfArray(distance.file - 1, files, this.file),
-        getNextElementsOfArray(distance.rank - 1, ranks, this.rank)
-      ).map((pos) => new Position(...pos));
-    }
     return [];
+  }
+
+  toString(): string {
+    return `${this.file}${this.rank}`;
   }
 }

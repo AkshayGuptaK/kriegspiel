@@ -85,7 +85,7 @@ export class Board {
     const opponent = getOtherColor(player);
     const capturedPiece = this.findPieceAt(opponent, to);
     if (capturedPiece) {
-      console.log(`Capture at ${to}`);
+      console.log(`Capture at ${to.toString()}`);
       this.capture(opponent, capturedPiece);
     }
     piece.moveTo(to);
