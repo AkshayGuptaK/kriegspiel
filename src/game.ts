@@ -27,7 +27,9 @@ export class Game {
       return console.log('You do not control any piece at that position');
     if (!piece.canMoveTo(to))
       return console.log(`Your ${piece.name} cannot move there`);
-    // check for if move is obstructed
+    const path = from.pathTo(to);
+    if (this.board.isPieceInPath(path))
+      return console.log('That path is obstructed');
     piece.moveTo(to);
     // check if capture is effected
     this.currentPlayer == 'white'

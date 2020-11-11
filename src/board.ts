@@ -1,5 +1,6 @@
 import { files, PosRank, PosFile, Position } from './position';
 import { Color, Piece, Rook, Knight, King, Queen, Pawn, Bishop } from './piece';
+import { identity } from './utils';
 
 export class Board {
   private pieces: { white: Piece[]; black: Piece[] };
@@ -34,5 +35,15 @@ export class Board {
 
   findPieceAt(color: Color, position: Position): Piece {
     return this.pieces[color].filter((piece) => piece.isAt(position))[0];
+  }
+
+  isPieceAt(position: Position): boolean {
+    return !!(
+      this.findPieceAt('white', position) || this.findPieceAt('black', position)
+    );
+  }
+
+  isPieceInPath(path: Position[]): boolean {
+    return path.map(this.isPieceAt).some(identity);
   }
 }

@@ -1,3 +1,7 @@
+export function identity<T>(x: T): T {
+  return x;
+}
+
 export function getNextElementsOfArray<T>(
   next: number,
   arr: T[],
