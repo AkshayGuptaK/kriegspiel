@@ -17,11 +17,11 @@ export type PosFile = typeof files[number];
 export type PosRank = typeof ranks[number];
 
 export function isFile(file: string): file is PosFile {
-  return files.includes(file as any);
+  return files.includes(file as never);
 }
 
 export function isRank(rank: number): rank is PosRank {
-  return ranks.includes(rank as any);
+  return ranks.includes(rank as never);
 }
 
 interface Distance {

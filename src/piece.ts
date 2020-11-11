@@ -54,7 +54,9 @@ export class Queen extends Piece {
   name = 'queen';
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
-    return distance.rank <= 1 && distance.file <= 1; // needs implementing
+    return (
+      distance.rank == 0 || distance.file == 0 || distance.rank == distance.file
+    );
   }
 }
 
