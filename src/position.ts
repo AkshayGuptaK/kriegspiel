@@ -1,6 +1,6 @@
 import autoBind from 'auto-bind';
 import { literalArray } from './type-utils';
-import { getElementsInBetween, zip } from './utils';
+import { getElementsInBetween, getFirstFractionOfArray, zip } from './utils';
 
 export const files = literalArray<string>()([
   'a',
@@ -41,6 +41,14 @@ export class Position {
     };
   }
 
+  getLeftOf(by = 1): Position {
+    return new Position(files[files.indexOf(this.file) - by], this.rank);
+  }
+
+  getRightOf(by = 1): Position {
+    return new Position(files[files.indexOf(this.file) + by], this.rank);
+  }
+
   distanceFrom(position: Position): Distance {
     const vector = this.vectorFrom(position);
     return {
@@ -68,6 +76,10 @@ export class Position {
       );
     }
     return [];
+  }
+
+  isQueenSide(): boolean {
+    return getFirstFractionOfArray(files, 2).includes(this.file);
   }
 
   toString(): string {

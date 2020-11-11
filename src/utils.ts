@@ -29,3 +29,8 @@ export function zip<T, U>(arr1: T[], arr2: U[]): [T, U][] {
 export function removeItemFromArray<T>(arr: T[], item: T): T[] {
   return arr.splice(arr.indexOf(item), 1);
 }
+
+export function getFirstFractionOfArray<T>(arr: T[], fraction: number): T[] {
+  const endPoint = Math.floor((arr.length * (fraction - 1)) / fraction);
+  return arr.slice(0, endPoint);
+}

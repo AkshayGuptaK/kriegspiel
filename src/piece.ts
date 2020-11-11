@@ -8,7 +8,7 @@ export function getOtherColor(color: Color): Color {
 }
 
 export abstract class Piece {
-  protected position: Position;
+  position: Position;
   constructor(private readonly color: Color, file: PosFile, rank: PosRank) {
     this.position = new Position(file, rank);
     autoBind(this);
@@ -26,9 +26,21 @@ export abstract class Piece {
 
 export class King extends Piece {
   name = 'king';
+  private hasMoved = false;
+
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
     return distance.rank < 2 && distance.file < 2;
+  }
+
+  canCastleTo(position: Position): boolean {
+    const distance = this.position.distanceFrom(position);
+    return distance.rank == 0 && distance.file == 2 && !this.hasMoved;
+  }
+
+  moveTo(position: Position): void {
+    super.moveTo(position);
+    if (!this.hasMoved) this.hasMoved = true;
   }
 }
 
@@ -40,11 +52,32 @@ export class Queen extends Piece {
   }
 }
 
+export function isRook(piece: Piece): piece is Rook {
+  return piece.name == 'rook';
+}
+
 export class Rook extends Piece {
   name = 'rook';
+  hasMoved = false;
+
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
     return distance.rank == 0 || distance.file == 0;
+  }
+
+  canCastleTo(position: Position): boolean {
+    const distance = this.position.distanceFrom(position);
+    const extraMoveDistance = this.position.isQueenSide() ? 1 : 0;
+    return (
+      distance.rank == 0 &&
+      distance.file == 2 + extraMoveDistance &&
+      !this.hasMoved
+    );
+  }
+
+  moveTo(position: Position): void {
+    super.moveTo(position);
+    if (!this.hasMoved) this.hasMoved = true;
   }
 }
 
@@ -69,8 +102,15 @@ export class Knight extends Piece {
 
 export class Pawn extends Piece {
   name = 'pawn';
+  hasMoved = false;
+
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
     return distance.rank < 2 && distance.file < 2; // needs implementing
+  }
+
+  moveTo(position: Position): void {
+    super.moveTo(position);
+    if (!this.hasMoved) this.hasMoved = true;
   }
 }

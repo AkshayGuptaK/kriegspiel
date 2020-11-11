@@ -10,6 +10,7 @@ import {
   Queen,
   Pawn,
   Bishop,
+  isRook,
 } from './piece';
 import { identity, removeItemFromArray } from './utils';
 
@@ -63,6 +64,28 @@ export class Board {
     this.pieces[color] = removeItemFromArray(this.pieces[color], piece);
   }
 
+  isObstructed(player: Color, from: Position, to: Position): boolean {
+    const path = from.pathTo(to);
+    if (this.isPieceInPath(path)) {
+      console.log('That move is obstructed');
+      return true;
+    }
+    if (this.findPieceAt(player, to)) {
+      console.log('That move is obstructed');
+      return true;
+    }
+    return false;
+  }
+
+  checkCapture(player: Color, to: Position): void {
+    const opponent = getOtherColor(player);
+    const capturedPiece = this.findPieceAt(opponent, to);
+    if (capturedPiece) {
+      console.log(`Capture at ${to.toString()}`);
+      this.capture(opponent, capturedPiece);
+    }
+  }
+
   tryMove(player: Color, from: Position, to: Position): boolean {
     const piece = this.findPieceAt(player, from);
     if (!piece) {
@@ -70,25 +93,38 @@ export class Board {
       return false;
     }
     if (!piece.canMoveTo(to)) {
+      if (piece instanceof King) {
+        return this.tryCastle(player, piece, to);
+      }
       console.log(`Your ${piece.name} cannot move there`);
       return false;
     }
-    const path = from.pathTo(to);
-    if (this.isPieceInPath(path)) {
-      console.log('That move is obstructed');
+    if (this.isObstructed(player, from, to)) {
       return false;
     }
-    if (this.findPieceAt(player, to)) {
-      console.log('That destination is obstructed');
-      return false;
-    }
-    const opponent = getOtherColor(player);
-    const capturedPiece = this.findPieceAt(opponent, to);
-    if (capturedPiece) {
-      console.log(`Capture at ${to.toString()}`);
-      this.capture(opponent, capturedPiece);
-    }
+    this.checkCapture(player, to);
     piece.moveTo(to);
     return true;
+  }
+
+  tryCastle(player: Color, king: King, to: Position): boolean {
+    if (king.canCastleTo(to)) {
+      const rookTo = to.isQueenSide() ? to.getRightOf() : to.getLeftOf();
+      const rooks = this.pieces[player].filter(isRook);
+      const castlingRook = rooks.find((rook) => rook.canCastleTo(rookTo));
+      if (castlingRook) {
+        if (
+          this.isObstructed(player, king.position, to) ||
+          this.isObstructed(player, castlingRook.position, rookTo)
+        ) {
+          return false;
+        }
+        king.moveTo(to);
+        castlingRook.moveTo(rookTo);
+        return true;
+      }
+    }
+    console.log(`Your ${king.name} cannot move there`);
+    return false;
   }
 }
