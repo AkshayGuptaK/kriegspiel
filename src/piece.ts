@@ -8,11 +8,16 @@ export function getOtherColor(color: Color): Color {
 }
 
 export abstract class Piece {
-  position: Position;
+  private position: Position;
   constructor(protected readonly color: Color, file: PosFile, rank: PosRank) {
     this.position = new Position(file, rank);
     autoBind(this);
   }
+
+  getPosition(): Position {
+    return this.position;
+  }
+
   moveTo(position: Position): void {
     this.position = position;
   }

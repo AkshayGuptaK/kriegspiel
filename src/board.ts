@@ -114,8 +114,8 @@ export class Board {
       const castlingRook = rooks.find((rook) => rook.canCastleTo(rookTo));
       if (castlingRook) {
         if (
-          this.isObstructed(player, king.position, to) ||
-          this.isObstructed(player, castlingRook.position, rookTo)
+          this.isObstructed(player, king.getPosition(), to) ||
+          this.isObstructed(player, castlingRook.getPosition(), rookTo)
         ) {
           return false;
         }
