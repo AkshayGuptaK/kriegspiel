@@ -34,7 +34,7 @@ export class Position {
     autoBind(this);
   }
 
-  private vectorFrom(position: Position): Distance {
+  vectorTo(position: Position): Distance {
     return {
       rank: position.rank - this.rank,
       file: position.file.charCodeAt(0) - this.file.charCodeAt(0),
@@ -50,7 +50,7 @@ export class Position {
   }
 
   distanceFrom(position: Position): Distance {
-    const vector = this.vectorFrom(position);
+    const vector = this.vectorTo(position);
     return {
       rank: Math.abs(vector.rank),
       file: Math.abs(vector.file),

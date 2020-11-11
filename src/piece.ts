@@ -9,7 +9,7 @@ export function getOtherColor(color: Color): Color {
 
 export abstract class Piece {
   position: Position;
-  constructor(private readonly color: Color, file: PosFile, rank: PosRank) {
+  constructor(protected readonly color: Color, file: PosFile, rank: PosRank) {
     this.position = new Position(file, rank);
     autoBind(this);
   }
@@ -30,7 +30,7 @@ export class King extends Piece {
 
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
-    return distance.rank < 2 && distance.file < 2;
+    return distance.rank <= 1 && distance.file <= 1;
   }
 
   canCastleTo(position: Position): boolean {
@@ -48,7 +48,7 @@ export class Queen extends Piece {
   name = 'queen';
   canMoveTo(position: Position): boolean {
     const distance = this.position.distanceFrom(position);
-    return distance.rank < 2 && distance.file < 2; // needs implementing
+    return distance.rank <= 1 && distance.file <= 1; // needs implementing
   }
 }
 
@@ -105,8 +105,15 @@ export class Pawn extends Piece {
   hasMoved = false;
 
   canMoveTo(position: Position): boolean {
-    const distance = this.position.distanceFrom(position);
-    return distance.rank < 2 && distance.file < 2; // needs implementing
+    const vector = this.position.vectorTo(position);
+    const extraMoveDistance = this.hasMoved ? 0 : 1;
+    const isMovingInRightDirection =
+      this.color == 'white' ? vector.rank > 0 : vector.rank < 0;
+    return (
+      isMovingInRightDirection &&
+      Math.abs(vector.rank) <= 1 + extraMoveDistance &&
+      vector.file == 0
+    );
   }
 
   moveTo(position: Position): void {
