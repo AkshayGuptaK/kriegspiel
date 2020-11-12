@@ -9,6 +9,45 @@ export type MoveData = [
   to: Position
 ];
 
+abstract class MoveMonad {
+  constructor(
+    private actions: unknown[] | null = [],
+    private message: string = ''
+  ) {}
+
+  protected compose(move: MoveMonad): Legal {
+    return new Legal(
+      [...this.actions, ...move.actions],
+      this.message + ' ' + move.message
+    );
+  }
+
+  abstract chain(move: MoveMonad): MoveMonad;
+}
+
+export class Illegal extends MoveMonad {
+  constructor(message: string) {
+    super(null, message);
+  }
+
+  chain(move: MoveMonad): Illegal {
+    return this;
+  }
+}
+
+export class Legal extends MoveMonad {
+  constructor(action: unknown[] | null, message: string) {
+    super(action, message);
+  }
+
+  chain(move: MoveMonad): MoveMonad {
+    if (move instanceof Illegal) {
+      return move;
+    }
+    return this.compose(move);
+  }
+}
+
 export class Move {
   constructor(
     private turn: number,
