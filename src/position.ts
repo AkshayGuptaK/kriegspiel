@@ -1,6 +1,7 @@
 import autoBind from 'auto-bind';
 import { literalArray } from './type-utils';
 import { getElementsInBetween, getFirstFractionOfArray, zip } from './utils';
+import { Vector } from './vector';
 
 export const files = literalArray<string>()([
   'a',
@@ -24,26 +25,28 @@ export function isRank(rank: number): rank is PosRank {
   return ranks.includes(rank as never);
 }
 
-interface Distance {
-  rank: number;
-  file: number;
-}
-
 export class Position {
   constructor(private file: PosFile, private rank: PosRank) {
     autoBind(this);
   }
 
-  vectorTo(position: Position): Distance {
-    return {
-      rank: position.rank - this.rank,
-      file: position.file.charCodeAt(0) - this.file.charCodeAt(0),
-    };
+  getRank(): PosRank {
+    return this.rank;
+  }
+
+  getFile(): PosFile {
+    return this.file;
   }
 
   isSamePosition(position: Position): boolean {
-    const vector = this.vectorTo(position);
-    return vector.rank == 0 && vector.file == 0;
+    return this.file == position.file && this.rank == position.rank;
+  }
+
+  vectorTo(to: Position): Vector {
+    return new Vector(
+      to.rank - this.rank,
+      to.file.charCodeAt(0) - this.file.charCodeAt(0)
+    );
   }
 
   getLeftOf(by = 1): Position {
@@ -54,28 +57,20 @@ export class Position {
     return new Position(files[files.indexOf(this.file) + by], this.rank);
   }
 
-  distanceFrom(position: Position): Distance {
-    const vector = this.vectorTo(position);
-    return {
-      rank: Math.abs(vector.rank),
-      file: Math.abs(vector.file),
-    };
-  }
-
   pathTo(position: Position): Position[] {
-    const distance = this.distanceFrom(position);
-    if (distance.rank == distance.file) {
+    const vector = this.vectorTo(position);
+    if (vector.isDiagonal()) {
       return zip(
         getElementsInBetween(files, this.file, position.file),
         getElementsInBetween(ranks, this.rank, position.rank)
       ).map((pos) => new Position(...pos));
     }
-    if (distance.file > 0) {
+    if (vector.isAlongFile()) {
       return getElementsInBetween(files, this.file, position.file).map(
         (file) => new Position(file, this.rank)
       );
     }
-    if (distance.rank > 0) {
+    if (vector.isAlongRank()) {
       return getElementsInBetween(ranks, this.rank, position.rank).map(
         (rank) => new Position(this.file, rank)
       );

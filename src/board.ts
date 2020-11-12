@@ -1,86 +1,63 @@
 import autoBind from 'auto-bind';
-import { files, PosRank, PosFile, Position } from './position';
+import { files, Position } from './position';
 import {
   Color,
   getOtherColor,
-  Piece,
   Rook,
   Knight,
   King,
   Queen,
   Pawn,
   Bishop,
-  isRook,
 } from './piece';
 import { Move, MoveData } from './history';
-import { identity, removeItemFromArray } from './utils';
+import { Mailbox } from './mailbox';
 
 export class Board {
-  private pieces: { white: Piece[]; black: Piece[] };
+  private chessboard: Mailbox;
   constructor() {
-    this.pieces = this.makePieces();
     autoBind(this);
+    this.chessboard = new Mailbox();
+    this.makeArmies();
   }
 
-  private makePawns(color: Color, pawnRank: PosRank) {
-    return files.map((file: PosFile) => new Pawn(color, file, pawnRank));
+  private makePawns(color: Color) {
+    return files.map(() => new Pawn(color));
   }
 
-  private makeArmy(color: Color, pieceRank: PosRank, pawnRank: PosRank) {
+  private makePieces(color: Color) {
     return [
-      new Rook(color, 'a', pieceRank),
-      new Knight(color, 'b', pieceRank),
-      new Bishop(color, 'c', pieceRank),
-      new Queen(color, 'd', pieceRank),
-      new King(color, 'e', pieceRank),
-      new Bishop(color, 'f', pieceRank),
-      new Knight(color, 'g', pieceRank),
-      new Rook(color, 'h', pieceRank),
-      ...this.makePawns(color, pawnRank),
+      new Rook(color),
+      new Knight(color),
+      new Bishop(color),
+      new Queen(color),
+      new King(color),
+      new Bishop(color),
+      new Knight(color),
+      new Rook(color),
     ];
   }
 
-  private makePieces() {
-    return {
-      white: this.makeArmy('white', 1, 2),
-      black: this.makeArmy('black', 8, 7),
-    };
+  private makeArmies() {
+    this.chessboard.setPiecesForRank(this.makePieces('white'), 1);
+    this.chessboard.setPiecesForRank(this.makePawns('white'), 2);
+    this.chessboard.setPiecesForRank(this.makePieces('black'), 8);
+    this.chessboard.setPiecesForRank(this.makePawns('black'), 7);
   }
 
-  findPieceAt(color: Color, position: Position): Piece {
-    return this.pieces[color].filter((piece) => piece.isAt(position))[0];
-  }
-
-  isPieceAt(position: Position): boolean {
-    return !!(
-      this.findPieceAt('white', position) || this.findPieceAt('black', position)
-    );
-  }
-
-  isPieceInPath(path: Position[]): boolean {
-    return path.map(this.isPieceAt).some(identity);
-  }
-
-  capture(color: Color, piece: Piece, to: Position): void {
-    console.log(
-      this.pieces[color].map((piece) => piece.getPosition().toString()),
-      'army before'
-    );
-    this.pieces[color] = removeItemFromArray(this.pieces[color], piece);
-    console.log(
-      this.pieces[color].map((piece) => piece.getPosition().toString()),
-      'army after'
-    );
+  capture(to: Position): void {
+    this.chessboard.removePieceFromSquare(to);
     console.log(`Capture at ${to.toString()}`);
   }
 
   isObstructed(player: Color, from: Position, to: Position): boolean {
     const path = from.pathTo(to);
-    if (this.isPieceInPath(path)) {
+    if (this.chessboard.isPieceInPath(path)) {
       console.log('That move is obstructed');
       return true;
     }
-    if (this.findPieceAt(player, to)) {
+    const destinationPiece = this.chessboard.getPieceInSquare(to);
+    if (destinationPiece && destinationPiece.isColor(player)) {
       console.log('That move is obstructed');
       return true;
     }
@@ -89,9 +66,9 @@ export class Board {
 
   checkCapture(player: Color, to: Position): boolean {
     const opponent = getOtherColor(player);
-    const capturedPiece = this.findPieceAt(opponent, to);
-    if (capturedPiece) {
-      this.capture(opponent, capturedPiece, to);
+    const destinationPiece = this.chessboard.getPieceInSquare(to);
+    if (destinationPiece && destinationPiece.isColor(opponent)) {
+      this.capture(to);
       return true;
     }
     return false;
@@ -101,8 +78,7 @@ export class Board {
     const normalCapture = this.checkCapture(player, to);
     if (normalCapture) return true;
     if (previousMove.isDoublePawnMove() && previousMove.isInMovePath(to)) {
-      const opponent = getOtherColor(player);
-      this.capture(opponent, previousMove.getMovingPiece(), to);
+      this.capture(to);
       return true;
     }
     return false;
@@ -114,21 +90,23 @@ export class Board {
     to: Position,
     previousMove: Move
   ): MoveData | void {
-    const piece = this.findPieceAt(player, from);
-    if (!piece) {
+    const piece = this.chessboard.getPieceInSquare(from);
+    const moveVector = from.vectorTo(to);
+    if (!piece || !piece.isColor(player)) {
       console.log('You do not control any piece at that position');
       return;
     }
-    if (!piece.canMoveTo(to)) {
+    if (!piece.canMove(moveVector)) {
       if (piece instanceof King) {
-        return this.tryCastle(player, piece, to);
+        return this.tryCastle(player, piece, from, to);
       }
       if (
         piece instanceof Pawn &&
-        piece.canCapture(to) &&
+        piece.canCapture(moveVector) &&
         this.checkPawnCapture(player, to, previousMove)
       ) {
-        piece.moveTo(to);
+        this.chessboard.movePiece(from, to);
+        piece.setMoved();
         return [player, piece, from, to];
       }
       console.log(`Your ${piece.name} cannot move there`);
@@ -138,25 +116,37 @@ export class Board {
       return;
     }
     this.checkCapture(player, to);
-    piece.moveTo(to);
+    this.chessboard.movePiece(from, to);
+    piece.setMoved();
     return [player, piece, from, to];
   }
 
-  tryCastle(player: Color, king: King, to: Position): MoveData | void {
-    if (king.canCastleTo(to)) {
-      const rookTo = to.isQueenSide() ? to.getRightOf() : to.getLeftOf();
-      const rooks = this.pieces[player].filter(isRook);
-      const castlingRook = rooks.find((rook) => rook.canCastleTo(rookTo));
-      if (castlingRook) {
+  tryCastle(
+    player: Color,
+    king: King,
+    from: Position,
+    to: Position
+  ): MoveData | void {
+    const moveVector = from.vectorTo(to);
+    if (king.canCastle(moveVector)) {
+      const isKingside = moveVector.isRightwards();
+      const rookRank = player == 'white' ? 1 : 8;
+      const rookFile = isKingside ? 'h' : 'a';
+      const rookFrom = new Position(rookFile, rookRank);
+      const castlingRook = this.chessboard.getPieceInSquare(rookFrom);
+      if (castlingRook instanceof Rook && castlingRook.canCastle()) {
+        const rookTo = isKingside ? to.getLeftOf() : to.getRightOf();
         if (
-          this.isObstructed(player, king.getPosition(), to) ||
-          this.isObstructed(player, castlingRook.getPosition(), rookTo)
+          this.isObstructed(player, from, to) ||
+          this.isObstructed(player, rookFrom, rookTo)
         ) {
           return;
         }
-        king.moveTo(to);
-        castlingRook.moveTo(rookTo);
-        return [player, king, king.getPosition(), to];
+        this.chessboard.movePiece(from, to);
+        king.setMoved();
+        this.chessboard.movePiece(rookFrom, rookTo);
+        castlingRook.setMoved();
+        return [player, king, from, to];
       }
     }
     console.log(`Your ${king.name} cannot move there`);

@@ -1,5 +1,5 @@
 import autoBind from 'auto-bind';
-import { Position, PosFile, PosRank } from './position';
+import { Vector } from './vector';
 
 export type Color = 'black' | 'white';
 
@@ -8,103 +8,65 @@ export function getOtherColor(color: Color): Color {
 }
 
 export abstract class Piece {
-  protected position: Position;
-  constructor(protected readonly color: Color, file: PosFile, rank: PosRank) {
-    this.position = new Position(file, rank);
+  protected hasMoved = false;
+  constructor(protected readonly color: Color) {
     autoBind(this);
   }
 
-  getPosition(): Position {
-    return this.position;
+  isColor(color: Color): boolean {
+    return this.color == color;
   }
 
-  moveTo(position: Position): void {
-    this.position = position;
+  setMoved(): void {
+    this.hasMoved = true;
   }
 
-  isAt(position: Position): boolean {
-    return this.position.isSamePosition(position);
-  }
-
-  abstract canMoveTo(position: Position): boolean;
+  abstract canMove(vector: Vector): boolean;
   abstract readonly name: string;
 }
 
 export class King extends Piece {
   name = 'king';
-  private hasMoved = false;
 
-  canMoveTo(position: Position): boolean {
-    const distance = this.position.distanceFrom(position);
-    return distance.rank <= 1 && distance.file <= 1;
+  canMove(vector: Vector): boolean {
+    return vector.hasMagnitudesOfAtMost(1, 1);
   }
 
-  canCastleTo(position: Position): boolean {
-    const distance = this.position.distanceFrom(position);
-    return distance.rank == 0 && distance.file == 2 && !this.hasMoved;
-  }
-
-  moveTo(position: Position): void {
-    super.moveTo(position);
-    if (!this.hasMoved) this.hasMoved = true;
+  canCastle(vector: Vector): boolean {
+    return !this.hasMoved && vector.hasMagnitudes(0, 2);
   }
 }
 
 export class Queen extends Piece {
   name = 'queen';
-  canMoveTo(position: Position): boolean {
-    const distance = this.position.distanceFrom(position);
-    return (
-      distance.rank == 0 || distance.file == 0 || distance.rank == distance.file
-    );
+  canMove(vector: Vector): boolean {
+    return vector.isStraight() || vector.isDiagonal();
   }
-}
-
-export function isRook(piece: Piece): piece is Rook {
-  return piece.name == 'rook';
 }
 
 export class Rook extends Piece {
   name = 'rook';
-  hasMoved = false;
 
-  canMoveTo(position: Position): boolean {
-    const distance = this.position.distanceFrom(position);
-    return distance.rank == 0 || distance.file == 0;
+  canMove(vector: Vector): boolean {
+    return vector.isStraight();
   }
 
-  canCastleTo(position: Position): boolean {
-    const distance = this.position.distanceFrom(position);
-    const extraMoveDistance = this.position.isQueenSide() ? 1 : 0;
-    return (
-      distance.rank == 0 &&
-      distance.file == 2 + extraMoveDistance &&
-      !this.hasMoved
-    );
-  }
-
-  moveTo(position: Position): void {
-    super.moveTo(position);
-    if (!this.hasMoved) this.hasMoved = true;
+  canCastle(): boolean {
+    return !this.hasMoved;
   }
 }
 
 export class Bishop extends Piece {
   name = 'bishop';
-  canMoveTo(position: Position): boolean {
-    const distance = this.position.distanceFrom(position);
-    return distance.rank == distance.file;
+  canMove(vector: Vector): boolean {
+    return vector.isDiagonal();
   }
 }
 
 export class Knight extends Piece {
   name = 'knight';
-  canMoveTo(position: Position): boolean {
-    const distance = this.position.distanceFrom(position);
-    return (
-      (distance.rank == 1 || distance.rank == 2) &&
-      distance.file == 3 - distance.rank
-    );
+  canMove(vector: Vector): boolean {
+    return vector.isL();
   }
 }
 
@@ -112,28 +74,19 @@ export class Pawn extends Piece {
   name = 'pawn';
   hasMoved = false;
 
-  canMoveTo(position: Position): boolean {
-    const vector = this.position.vectorTo(position);
+  canMove(vector: Vector): boolean {
     const extraMoveDistance = this.hasMoved ? 0 : 1;
     const isMovingInRightDirection =
-      this.color == 'white' ? vector.rank > 0 : vector.rank < 0;
+      (this.color == 'white') == vector.isForwards();
     return (
       isMovingInRightDirection &&
-      Math.abs(vector.rank) <= 1 + extraMoveDistance &&
-      vector.file == 0
+      vector.hasMagnitudesOfAtMost(1 + extraMoveDistance, 0)
     );
   }
 
-  canCapture(position: Position): boolean {
-    const vector = this.position.vectorTo(position);
-    const distance = this.position.distanceFrom(position);
+  canCapture(vector: Vector): boolean {
     const isMovingInRightDirection =
-      this.color == 'white' ? vector.rank > 0 : vector.rank < 0;
-    return isMovingInRightDirection && distance.rank == 1 && distance.file == 1;
-  }
-
-  moveTo(position: Position): void {
-    super.moveTo(position);
-    if (!this.hasMoved) this.hasMoved = true;
+      (this.color == 'white') == vector.isForwards();
+    return isMovingInRightDirection && vector.hasMagnitudes(1, 1);
   }
 }

@@ -25,9 +25,8 @@ export class Move {
   }
 
   isDoublePawnMove(): boolean {
-    return (
-      this.piece instanceof Pawn && this.to.distanceFrom(this.from).rank == 2
-    );
+    const vector = this.from.vectorTo(this.to);
+    return this.piece instanceof Pawn && vector.hasMagnitudes(2, 0);
   }
 
   isInMovePath(position: Position): boolean {
