@@ -10,11 +10,12 @@ interface Chessboard {
   isPieceInSquare(square: Position): boolean;
   isPieceInPath(path: Position[]): boolean;
   movePiece(from: Position, to: Position): void;
+  getPositionOfKing(color: Color): Position;
 }
 
 export class Mailbox implements Chessboard {
   protected mailbox: (Piece | null)[][];
-  private kings: { [key in Color]: [number, number] };
+  private kings: { [key in Color]?: [number, number] } = {};
   constructor() {
     this.mailbox = ranks.map(() => files.map(() => null));
     autoBind(this);
@@ -28,11 +29,27 @@ export class Mailbox implements Chessboard {
     return rank - 1;
   }
 
+  private convertIndexToFile(index: number): PosFile {
+    return files[index];
+  }
+
+  private convertIndexToRank(index: number): PosRank {
+    return (index + 1) as PosRank;
+  }
+
   private convertSquareToIndexes(square: Position): [number, number] {
     return [
       this.convertRankToIndex(square.getRank()),
       this.convertFileToIndex(square.getFile()),
     ];
+  }
+
+  private convertIndexesToSquare(indexes: [number, number]): Position {
+    const [rankIndex, fileIndex] = indexes;
+    return new Position(
+      this.convertIndexToFile(fileIndex),
+      this.convertIndexToRank(rankIndex)
+    );
   }
 
   getPieceInSquare(square: Position): Piece | null {
@@ -64,5 +81,9 @@ export class Mailbox implements Chessboard {
   movePiece(from: Position, to: Position): void {
     this.addPieceToSquare(this.getPieceInSquare(from), to);
     this.removePieceFromSquare(from);
+  }
+
+  getPositionOfKing(color: Color): Position {
+    return this.convertIndexesToSquare(this.kings[color]);
   }
 }
