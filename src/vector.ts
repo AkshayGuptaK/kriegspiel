@@ -1,5 +1,9 @@
+import autoBind from 'auto-bind';
+
 export class Vector {
-  constructor(private rank: number, private file: number) {}
+  constructor(private rank: number, private file: number) {
+    autoBind(this);
+  }
 
   private toDistance() {
     return {

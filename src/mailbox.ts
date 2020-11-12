@@ -1,3 +1,4 @@
+import autoBind from 'auto-bind';
 import { Piece } from './piece';
 import { files, PosFile, Position, PosRank, ranks } from './position';
 import { identity } from './utils';
@@ -16,6 +17,7 @@ export class Mailbox implements Chessboard {
   protected mailbox: (Piece | null)[][];
   constructor() {
     this.mailbox = ranks.map(() => files.map(() => null));
+    autoBind(this);
   }
 
   private convertFileToIndex(file: PosFile) {
