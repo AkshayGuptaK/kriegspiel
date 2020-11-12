@@ -3,6 +3,7 @@ import { Position, files, PosRank } from './position';
 import {
   Color,
   getOtherColor,
+  Piece,
   King,
   Queen,
   Rook,
@@ -50,13 +51,19 @@ export class Board {
     this.addPawns('black', 7);
   }
 
-  private isObstructed(player: Color, from: Position, to: Position): boolean {
+  private isObstructed(
+    player: Color,
+    from: Position,
+    to: Position,
+    piece: Piece
+  ): boolean {
     const path = from.pathTo(to);
     const isPathObstructed = this.chessboard.isPieceInPath(path);
 
     const destinationPiece = this.chessboard.getPieceInSquare(to);
     const isDestinationObstructed =
-      destinationPiece && destinationPiece.isColor(player);
+      destinationPiece &&
+      (destinationPiece.isColor(player) || piece instanceof Pawn);
 
     return isPathObstructed || isDestinationObstructed;
   }
@@ -102,8 +109,8 @@ export class Board {
       if (castlingRook instanceof Rook && castlingRook.canCastle()) {
         const rookTo = isKingside ? to.getLeftOf() : to.getRightOf();
         if (
-          this.isObstructed(player, from, to) ||
-          this.isObstructed(player, rookFrom, rookTo)
+          this.isObstructed(player, from, to, king) ||
+          this.isObstructed(player, rookFrom, rookTo, castlingRook)
         ) {
           console.log('That move is obstructed');
           return;
@@ -150,7 +157,7 @@ export class Board {
       console.log(`Your ${piece.name} cannot move there`);
       return;
     }
-    if (this.isObstructed(player, from, to)) {
+    if (this.isObstructed(player, from, to, piece)) {
       console.log('That move is obstructed');
       return;
     }
