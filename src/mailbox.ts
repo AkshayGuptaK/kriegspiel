@@ -1,12 +1,11 @@
 import autoBind from 'auto-bind';
-import { Piece } from './piece';
+import { Color, King, Piece } from './piece';
 import { files, PosFile, Position, PosRank, ranks } from './position';
 import { identity } from './utils';
 
 interface Chessboard {
   removePieceFromSquare(square: Position): void;
   addPieceToSquare(piece: Piece, square: Position): void;
-  setPiecesForRank(pieces: Piece[], rank: PosRank): void;
   getPieceInSquare(square: Position): Piece | null;
   isPieceInSquare(square: Position): boolean;
   isPieceInPath(path: Position[]): boolean;
@@ -15,6 +14,7 @@ interface Chessboard {
 
 export class Mailbox implements Chessboard {
   protected mailbox: (Piece | null)[][];
+  private kings: { [key in Color]: [number, number] };
   constructor() {
     this.mailbox = ranks.map(() => files.map(() => null));
     autoBind(this);
@@ -28,30 +28,29 @@ export class Mailbox implements Chessboard {
     return rank - 1;
   }
 
-  private convertSquareToIndexes(square: Position) {
+  private convertSquareToIndexes(square: Position): [number, number] {
     return [
       this.convertRankToIndex(square.getRank()),
       this.convertFileToIndex(square.getFile()),
     ];
   }
 
-  removePieceFromSquare(square: Position): void {
+  getPieceInSquare(square: Position): Piece | null {
     const indexes = this.convertSquareToIndexes(square);
-    this.mailbox[indexes[0]][indexes[1]] = null;
+    return this.mailbox[indexes[0]][indexes[1]];
   }
 
   addPieceToSquare(piece: Piece, square: Position): void {
     const indexes = this.convertSquareToIndexes(square);
     this.mailbox[indexes[0]][indexes[1]] = piece;
+    if (piece instanceof King) {
+      this.kings[piece.getColor()] = indexes;
+    }
   }
 
-  setPiecesForRank(pieces: Piece[], rank: PosRank): void {
-    this.mailbox[this.convertRankToIndex(rank)] = pieces;
-  }
-
-  getPieceInSquare(square: Position): Piece | null {
+  removePieceFromSquare(square: Position): void {
     const indexes = this.convertSquareToIndexes(square);
-    return this.mailbox[indexes[0]][indexes[1]];
+    this.mailbox[indexes[0]][indexes[1]] = null;
   }
 
   isPieceInSquare(square: Position): boolean {

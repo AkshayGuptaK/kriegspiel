@@ -13,6 +13,10 @@ export abstract class Piece {
     autoBind(this);
   }
 
+  getColor(): Color {
+    return this.color;
+  }
+
   isColor(color: Color): boolean {
     return this.color == color;
   }
