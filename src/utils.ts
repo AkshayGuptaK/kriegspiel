@@ -35,3 +35,14 @@ export function getFirstFractionOfArray<T>(arr: T[], fraction: number): T[] {
   const endPoint = Math.floor((arr.length * (fraction - 1)) / fraction);
   return arr.slice(0, endPoint);
 }
+
+export function binaryMap<T, U, V>(f: (T, U) => V, arr: [T, U][]): V[] {
+  return arr.map((elem) => f(elem[0], elem[1]));
+}
+
+export function constructClass<T>(
+  cls: { new (...args: unknown[]): T },
+  ...args: unknown[]
+): T {
+  return new cls(...args);
+}
