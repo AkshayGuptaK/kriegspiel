@@ -2,6 +2,10 @@ export function identity<T>(x: T): T {
   return x;
 }
 
+export function noop(): void {
+  // do nothing
+}
+
 export function getElementsInBetween<T>(
   arr: T[],
   element1: T,

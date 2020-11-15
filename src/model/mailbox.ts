@@ -11,13 +11,16 @@ export interface Chessboard {
   isPieceInPath(path: Position[]): boolean;
   movePiece(from: Position, to: Position | null): void;
   getPositionOfKing(color: Color): Position;
+  clone(): Chessboard;
 }
 
 export class Mailbox implements Chessboard {
-  protected mailbox: (Piece | null)[][];
-  private kings: { [key in Color]?: [number, number] } = {};
-  constructor() {
-    this.mailbox = ranks.map(() => files.map(() => null));
+  constructor(
+    protected mailbox: (Piece | null)[][] = ranks.map(() =>
+      files.map(() => null)
+    ),
+    private kings: { [key in Color]?: [number, number] } = {}
+  ) {
     autoBind(this);
   }
 
@@ -85,5 +88,12 @@ export class Mailbox implements Chessboard {
 
   getPositionOfKing(color: Color): Position {
     return this.convertIndexesToSquare(this.kings[color]);
+  }
+
+  clone(): Mailbox {
+    return new Mailbox(
+      this.mailbox.map((rank) => [...rank]),
+      this.kings
+    );
   }
 }

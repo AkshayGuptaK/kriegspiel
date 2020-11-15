@@ -1,5 +1,5 @@
 import autoBind from 'auto-bind';
-import { Position, files, PosRank } from './movement/position';
+import { Position, files, PosRank, ranks } from './movement/position';
 import {
   Color,
   getOtherColor,
@@ -9,10 +9,11 @@ import {
   Bishop,
   Knight,
   Pawn,
+  Piece,
 } from './piece';
 import { Move } from './movement/move';
 import { Chessboard, Mailbox } from './model/mailbox';
-import { binaryMap, constructClass, zip } from './utils/utils';
+import { binaryMap, constructClass, identity, noop, zip } from './utils/utils';
 import { Either } from './utils/either';
 import {
   ifContinueElseDo,
@@ -20,13 +21,11 @@ import {
   ifAnyDoElseError,
 } from './utils/if';
 import { all, compose } from './utils/fp-utils';
+import { isNotNullish } from './utils/type-utils';
 
 export class Board {
-  private chessboard: Chessboard;
-  constructor() {
+  constructor(private chessboard: Chessboard = new Mailbox()) {
     autoBind(this);
-    this.chessboard = new Mailbox();
-    this.makeArmies();
   }
 
   getBoard(): Chessboard {
@@ -54,7 +53,7 @@ export class Board {
     );
   }
 
-  private makeArmies(): void {
+  makeArmies(): void {
     this.addPieces('white', 1);
     this.addPawns('white', 2);
     this.addPieces('black', 8);
@@ -177,12 +176,39 @@ export class Board {
     // i need to execute the move and try all the enemy piece attacks
   }
 
+  isPlayerInCheck(player: Color, previousMove: Move): Piece[] {
+    const opponent = getOtherColor(player);
+    const kingPosition = this.chessboard.getPositionOfKing(player);
+    const squares = files
+      .map((file) => ranks.map((rank) => new Position(file, rank)))
+      .flat();
+    const pieces = squares.map(this.chessboard.getPieceInSquare);
+    return zip(pieces, squares)
+      .filter(([piece, _position]) => piece && piece.isColor(opponent))
+      .map(([_piece, position]) =>
+        this.tryMove(opponent, position, kingPosition, previousMove)
+      )
+      .map((either) => either.fold(noop, identity))
+      .filter(isNotNullish)
+      .map((move: Move) => move.piece);
+  }
+
   doMove(move: Move): Move {
-    const { player, piece, from, to } = move;
+    const { from, to } = move;
     move.getAssociatedMoves().map(this.doMove);
     this.chessboard.movePiece(from, to);
-    const isCapture = piece.isColor(getOtherColor(player));
-    isCapture ? console.log(`Capture at ${to.toString()}`) : piece.setMoved();
     return move;
+  }
+
+  doMoveForReal(move: Move): void {
+    this.doMove(move);
+    move.getAssociatedMoves().map(({ player, piece, to }) => {
+      const isCapture = piece.isColor(getOtherColor(player));
+      isCapture ? console.log(`Capture at ${to.toString()}`) : piece.setMoved();
+    });
+  }
+
+  clone(): Board {
+    return new Board(this.chessboard.clone());
   }
 }
