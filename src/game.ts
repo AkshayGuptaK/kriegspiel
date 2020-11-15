@@ -25,17 +25,6 @@ export class Game {
     }
   }
 
-  check(move: Move): Move | void {
-    const trialBoard = this.board.clone();
-    trialBoard.doMove(move);
-    const threats = trialBoard.isPlayerInCheck(move.player, move);
-    if (threats.length) return console.log('That move is not legal');
-    this.board.doMoveForReal(move);
-    const checks = this.board.isPlayerInCheck(getOtherColor(move.player), move);
-    if (checks.length) console.log('Check!');
-    return move;
-  }
-
   advanceTurn(move: Move): void {
     if (move) {
       console.log(new AsciiBoard(this.board.getBoard()).print());
@@ -52,6 +41,6 @@ export class Game {
     if (!confirm) return;
     this.board
       .tryMove(this.currentPlayer, from, to, this.previousMove)
-      .fold(console.log, compose(this.advanceTurn, this.check));
+      .fold(console.log, compose(this.advanceTurn, this.board.check));
   }
 }

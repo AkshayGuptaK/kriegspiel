@@ -172,8 +172,6 @@ export class Board {
         )
       )
       .map(this.tryCapture);
-    // is this move illegal because it would put me in check?
-    // i need to execute the move and try all the enemy piece attacks
   }
 
   isPlayerInCheck(player: Color, previousMove: Move): Piece[] {
@@ -193,6 +191,24 @@ export class Board {
       .map((move: Move) => move.piece);
   }
 
+  check(move: Move): Move | void {
+    const trialBoard = this.clone();
+    trialBoard.doMove(move);
+    const threats = trialBoard.isPlayerInCheck(move.player, move);
+    if (threats.length) return console.log('That move is not legal');
+    this.doMoveForReal(move);
+
+    const checks = this.isPlayerInCheck(getOtherColor(move.player), move);
+    if (checks.length) console.log('Check!');
+    return move;
+  }
+
+  checkmate(checks: Piece[]): boolean {
+    // try all king moves
+    // try all capture for each checking piece
+    // get move path for checking piece, check for moving into that
+  }
+
   doMove(move: Move): Move {
     const { from, to } = move;
     move.getAssociatedMoves().map(this.doMove);
@@ -200,12 +216,13 @@ export class Board {
     return move;
   }
 
-  doMoveForReal(move: Move): void {
+  doMoveForReal(move: Move): Move {
     this.doMove(move);
     move.getAssociatedMoves().map(({ player, piece, to }) => {
       const isCapture = piece.isColor(getOtherColor(player));
       isCapture ? console.log(`Capture at ${to.toString()}`) : piece.setMoved();
     });
+    return move;
   }
 
   clone(): Board {
