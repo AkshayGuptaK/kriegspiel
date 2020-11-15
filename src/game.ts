@@ -1,7 +1,9 @@
 import autoBind from 'auto-bind';
+import { AsciiBoard } from './ascii';
 import { Board } from './board';
+import { compose } from './fp-utils';
+import { Move } from './move';
 import { Color } from './piece';
-import { Move, History } from './history';
 import { promptMove } from './prompt';
 
 export class Game {
@@ -9,7 +11,7 @@ export class Game {
   private currentPlayer: Color = 'white';
   private board: Board;
   private checkmate = false;
-  private history: History = new History();
+  private previousMove = null;
 
   constructor() {
     this.board = new Board();
@@ -22,17 +24,20 @@ export class Game {
     }
   }
 
+  advanceTurn(move: Move): void {
+    console.log(new AsciiBoard(this.board.getBoard()).print());
+    this.previousMove = move;
+    this.currentPlayer == 'white'
+      ? (this.currentPlayer = 'black')
+      : ((this.currentPlayer = 'white'), this.turn++);
+  }
+
   async playTurn(): Promise<void> {
     const response = await promptMove(this.currentPlayer);
     const { from, to, confirm } = response.confirm;
     if (!confirm) return;
-    const previousMove = this.history.getPreviousMove();
-    const move = this.board.tryMove(this.currentPlayer, from, to, previousMove);
-    if (move) {
-      this.history.addMove(new Move(this.turn, ...move));
-      this.currentPlayer == 'white'
-        ? (this.currentPlayer = 'black')
-        : ((this.currentPlayer = 'white'), this.turn++);
-    }
+    this.board
+      .tryMove(this.currentPlayer, from, to, this.previousMove)
+      .fold(console.log, compose(this.advanceTurn, this.board.doMove));
   }
 }

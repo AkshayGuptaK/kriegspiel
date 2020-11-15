@@ -6,11 +6,11 @@ import { Vector } from './vector';
 
 export class Move implements Functor<Move> {
   constructor(
-    public player: Color,
-    public piece: Piece,
-    public from: Position | null,
-    public to: Position | null,
-    public previousMove: Move | null = null,
+    public readonly player: Color,
+    public readonly piece: Piece,
+    public readonly from: Position | null,
+    public readonly to: Position | null,
+    public readonly previousMove: Move | null = null,
     private associatedMoves: Move[] = []
   ) {
     autoBind(this);
@@ -23,6 +23,10 @@ export class Move implements Functor<Move> {
   associateMove(move: Move): Move {
     this.associatedMoves.push(move);
     return this;
+  }
+
+  getAssociatedMoves(): Move[] {
+    return this.associatedMoves;
   }
 
   isDoublePawnMove(): boolean {

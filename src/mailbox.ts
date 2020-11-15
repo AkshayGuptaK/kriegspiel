@@ -3,13 +3,13 @@ import { Color, King, Piece } from './piece';
 import { files, PosFile, Position, PosRank, ranks } from './position';
 import { identity } from './utils';
 
-interface Chessboard {
+export interface Chessboard {
   removePieceFromSquare(square: Position): void;
   addPieceToSquare(piece: Piece, square: Position): void;
   getPieceInSquare(square: Position): Piece | null;
   isPieceInSquare(square: Position): boolean;
   isPieceInPath(path: Position[]): boolean;
-  movePiece(from: Position, to: Position): void;
+  movePiece(from: Position, to: Position | null): void;
   getPositionOfKing(color: Color): Position;
 }
 
@@ -78,8 +78,8 @@ export class Mailbox implements Chessboard {
     return path.map(this.isPieceInSquare).some(identity);
   }
 
-  movePiece(from: Position, to: Position): void {
-    this.addPieceToSquare(this.getPieceInSquare(from), to);
+  movePiece(from: Position, to: Position | null): void {
+    to && this.addPieceToSquare(this.getPieceInSquare(from), to);
     this.removePieceFromSquare(from);
   }
 

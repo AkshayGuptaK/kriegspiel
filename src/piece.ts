@@ -25,12 +25,16 @@ export abstract class Piece {
     this.hasMoved = true;
   }
 
+  canCapture(vector: Vector): boolean {
+    return this.canMove(vector);
+  }
+
   abstract canMove(vector: Vector): boolean;
-  abstract readonly name: string;
+  abstract readonly symbol: string;
 }
 
 export class King extends Piece {
-  name = 'king';
+  symbol = 'k';
 
   canMove(vector: Vector): boolean {
     return vector.hasMagnitudesOfAtMost(1, 1);
@@ -42,14 +46,14 @@ export class King extends Piece {
 }
 
 export class Queen extends Piece {
-  name = 'queen';
+  symbol = 'q';
   canMove(vector: Vector): boolean {
     return vector.isStraight() || vector.isDiagonal();
   }
 }
 
 export class Rook extends Piece {
-  name = 'rook';
+  symbol = 'r';
 
   canMove(vector: Vector): boolean {
     return vector.isStraight();
@@ -61,21 +65,21 @@ export class Rook extends Piece {
 }
 
 export class Bishop extends Piece {
-  name = 'bishop';
+  symbol = 'b';
   canMove(vector: Vector): boolean {
     return vector.isDiagonal();
   }
 }
 
 export class Knight extends Piece {
-  name = 'knight';
+  symbol = 'n';
   canMove(vector: Vector): boolean {
     return vector.isL();
   }
 }
 
 export class Pawn extends Piece {
-  name = 'pawn';
+  symbol = 'p';
   hasMoved = false;
 
   canMove(vector: Vector): boolean {

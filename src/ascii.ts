@@ -38,7 +38,7 @@ export class AsciiBoard {
     const filesStr = '     a  b  c  d  e  f  g  h\n';
     return [
       border,
-      ...ranks.reverse().map(this.printRank),
+      ...ranks.slice().reverse().map(this.printRank),
       border,
       filesStr,
     ].join('');
