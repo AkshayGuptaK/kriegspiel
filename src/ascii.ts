@@ -1,37 +1,46 @@
-function ascii() {
-  var s = '   +------------------------+\n';
+import autoBind from 'auto-bind';
+import { Chessboard } from './mailbox';
+import { Piece } from './piece';
+import { files, Position, PosRank, ranks } from './position';
 
-  for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
-    /* display the rank */
-
-    if (file(i) === 0) {
-      s += ' ' + '87654321'[rank(i)] + ' |';
-    }
-
-    /* empty piece */
-
-    if (board[i] == null) {
-      s += ' . ';
-    } else {
-      var piece = board[i].type;
-
-      var color = board[i].color;
-
-      var symbol = color === WHITE ? piece.toUpperCase() : piece.toLowerCase();
-
-      s += ' ' + symbol + ' ';
-    }
-
-    if ((i + 1) & 0x88) {
-      s += '|\n';
-
-      i += 8;
-    }
+export class AsciiBoard {
+  constructor(private board: Chessboard) {
+    autoBind(this);
   }
 
-  s += '   +------------------------+\n';
+  private pad(str: string): string {
+    return ` ${str} `;
+  }
 
-  s += '     a  b  c  d  e  f  g  h\n';
+  private printPiece(piece: Piece | null): string {
+    if (!piece) return '.';
+    return piece.isColor('white')
+      ? piece.symbol.toUpperCase()
+      : piece.symbol.toLowerCase();
+  }
 
-  return s;
+  private printRank(rank: PosRank): string {
+    const rankStr = ` ${rank} |`;
+    const endStr = '|\n';
+    return [
+      rankStr,
+      ...files
+        .map((file) => new Position(file, rank))
+        .map(this.board.getPieceInSquare)
+        .map(this.printPiece)
+        .map(this.pad),
+      endStr,
+    ].join('');
+  }
+
+  print(): string {
+    const border = '   +------------------------+\n';
+    const filesStr = '     a  b  c  d  e  f  g  h\n';
+    return [
+      border,
+      ...ranks.reverse().map(this.printRank),
+      border,
+      filesStr,
+    ].join('');
+  }
 }
