@@ -1,10 +1,10 @@
 import autoBind from 'auto-bind';
-import { AsciiBoard } from './ascii';
+import { AsciiBoard } from './io/ascii';
 import { Board } from './board';
-import { compose } from './fp-utils';
-import { Move } from './move';
+import { compose } from './utils/fp-utils';
+import { Move } from './movement/move';
 import { Color } from './piece';
-import { promptMove } from './prompt';
+import { promptMove } from './io/prompt';
 
 export class Game {
   private turn = 1;

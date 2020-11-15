@@ -1,9 +1,8 @@
 import autoBind from 'auto-bind';
-import { Position, files, PosRank } from './position';
+import { Position, files, PosRank } from './movement/position';
 import {
   Color,
   getOtherColor,
-  Piece,
   King,
   Queen,
   Rook,
@@ -11,12 +10,16 @@ import {
   Knight,
   Pawn,
 } from './piece';
-import { Move } from './move';
-import { Chessboard, Mailbox } from './mailbox';
-import { binaryMap, constructClass, zip } from './utils';
-import { Either } from './either';
-import { ifContinueElseDo, ifContinueElseError, ifAnyDoElseError } from './if';
-import { all, compose } from './fp-utils';
+import { Move } from './movement/move';
+import { Chessboard, Mailbox } from './model/mailbox';
+import { binaryMap, constructClass, zip } from './utils/utils';
+import { Either } from './utils/either';
+import {
+  ifContinueElseDo,
+  ifContinueElseError,
+  ifAnyDoElseError,
+} from './utils/if';
+import { all, compose } from './utils/fp-utils';
 
 export class Board {
   private chessboard: Chessboard;
@@ -170,6 +173,8 @@ export class Board {
         )
       )
       .map(this.tryCapture);
+    // is this move illegal because it would put me in check?
+    // i need to execute the move and try all the enemy piece attacks
   }
 
   doMove(move: Move): Move {

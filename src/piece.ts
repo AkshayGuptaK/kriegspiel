@@ -1,7 +1,8 @@
 import autoBind from 'auto-bind';
-import { Vector } from './vector';
+import { Vector } from './movement/vector';
 
 export type Color = 'black' | 'white';
+export type pieceSymbol = 'k' | 'q' | 'r' | 'b' | 'n' | 'p';
 
 export function getOtherColor(color: Color): Color {
   return color == 'white' ? 'black' : 'white';
@@ -30,11 +31,11 @@ export abstract class Piece {
   }
 
   abstract canMove(vector: Vector): boolean;
-  abstract readonly symbol: string;
+  abstract readonly symbol: pieceSymbol;
 }
 
 export class King extends Piece {
-  symbol = 'k';
+  symbol: pieceSymbol = 'k';
 
   canMove(vector: Vector): boolean {
     return vector.hasMagnitudesOfAtMost(1, 1);
@@ -46,14 +47,14 @@ export class King extends Piece {
 }
 
 export class Queen extends Piece {
-  symbol = 'q';
+  symbol: pieceSymbol = 'q';
   canMove(vector: Vector): boolean {
     return vector.isStraight() || vector.isDiagonal();
   }
 }
 
 export class Rook extends Piece {
-  symbol = 'r';
+  symbol: pieceSymbol = 'r';
 
   canMove(vector: Vector): boolean {
     return vector.isStraight();
@@ -65,21 +66,21 @@ export class Rook extends Piece {
 }
 
 export class Bishop extends Piece {
-  symbol = 'b';
+  symbol: pieceSymbol = 'b';
   canMove(vector: Vector): boolean {
     return vector.isDiagonal();
   }
 }
 
 export class Knight extends Piece {
-  symbol = 'n';
+  symbol: pieceSymbol = 'n';
   canMove(vector: Vector): boolean {
     return vector.isL();
   }
 }
 
 export class Pawn extends Piece {
-  symbol = 'p';
+  symbol: pieceSymbol = 'p';
   hasMoved = false;
 
   canMove(vector: Vector): boolean {

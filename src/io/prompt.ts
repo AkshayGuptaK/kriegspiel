@@ -1,6 +1,12 @@
 import prompts, { Answers } from 'prompts';
-import { Color } from './piece';
-import { isFile, isRank, PosFile, Position, PosRank } from './position';
+import { Color } from '../piece';
+import {
+  isFile,
+  isRank,
+  PosFile,
+  Position,
+  PosRank,
+} from '../movement/position';
 
 function isValidSquare(square: string): boolean {
   return isFile(square[0]) && isRank(parseInt(square[1]));

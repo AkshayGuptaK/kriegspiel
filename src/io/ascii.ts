@@ -1,7 +1,7 @@
 import autoBind from 'auto-bind';
-import { Chessboard } from './mailbox';
-import { Piece } from './piece';
-import { files, Position, PosRank, ranks } from './position';
+import { Chessboard } from '../model/mailbox';
+import { Piece } from '../piece';
+import { files, Position, PosRank, ranks } from '../movement/position';
 
 export class AsciiBoard {
   constructor(private board: Chessboard) {

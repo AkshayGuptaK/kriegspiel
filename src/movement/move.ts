@@ -1,6 +1,6 @@
 import autoBind from 'auto-bind';
-import { Functor } from './fp-utils';
-import { Color, Pawn, Piece } from './piece';
+import { Functor } from '../utils/fp-utils';
+import { Color, Pawn, Piece } from '../piece';
 import { Position } from './position';
 import { Vector } from './vector';
 

@@ -1,6 +1,10 @@
 import autoBind from 'auto-bind';
-import { literalArray } from './type-utils';
-import { getElementsInBetween, getFirstFractionOfArray, zip } from './utils';
+import { literalArray } from '../utils/type-utils';
+import {
+  getElementsInBetween,
+  getFirstFractionOfArray,
+  zip,
+} from '../utils/utils';
 import { Vector } from './vector';
 
 export const files = literalArray<string>()([

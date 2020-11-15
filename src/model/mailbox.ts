@@ -1,7 +1,7 @@
 import autoBind from 'auto-bind';
-import { Color, King, Piece } from './piece';
-import { files, PosFile, Position, PosRank, ranks } from './position';
-import { identity } from './utils';
+import { Color, King, Piece } from '../piece';
+import { files, PosFile, Position, PosRank, ranks } from '../movement/position';
+import { identity } from '../utils/utils';
 
 export interface Chessboard {
   removePieceFromSquare(square: Position): void;
