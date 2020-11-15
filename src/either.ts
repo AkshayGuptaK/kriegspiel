@@ -1,5 +1,7 @@
-abstract class Either {
-  static of(val) {
+import autoBind from 'auto-bind';
+
+export abstract class Either {
+  static of(val: unknown): Right<unknown> {
     return new Right(val);
   }
 
@@ -20,36 +22,36 @@ abstract class Either {
     return f(this.unwrap());
   }
 
-  abstract map(fn: (val) => unknown);
+  abstract map(fn: (val) => unknown): Either;
   abstract unwrap(): unknown;
 }
 
-class Left<E> extends Either {
+export class Left<E> extends Either {
   constructor(private err: E) {
     super();
+    autoBind(this);
   }
 
-  unwrap() {
+  unwrap(): E {
     return this.err;
   }
 
-  map(_fn: unknown) {
+  map(_fn: unknown): Left<E> {
     return this;
   }
 }
 
-class Right<T> extends Either {
+export class Right<T> extends Either {
   constructor(private value: T) {
     super();
+    autoBind(this);
   }
 
   unwrap(): T {
     return this.value;
   }
 
-  map(fn: (val: T) => T) {
+  map(fn: (val: T) => T): Right<T> {
     return new Right(fn(this.value));
   }
 }
-
-export const either = (val: unknown): Either => Either.of(val);
