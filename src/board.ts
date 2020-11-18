@@ -204,6 +204,7 @@ export class Board {
   }
 
   checkmate(checks: Piece[]): boolean {
+    return false;
     // try all king moves
     // try all capture for each checking piece
     // get move path for checking piece, check for moving into that

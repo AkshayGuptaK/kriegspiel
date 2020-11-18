@@ -27,7 +27,7 @@ export class Game {
 
   advanceTurn(move: Move): void {
     if (move) {
-      console.log(new AsciiBoard(this.board.getBoard()).print());
+      console.log(new AsciiBoard(this.board.getBoard()).toString());
       this.previousMove = move;
       this.currentPlayer == 'white'
         ? (this.currentPlayer = 'black')

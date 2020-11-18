@@ -8,39 +8,32 @@ export class AsciiBoard {
     autoBind(this);
   }
 
-  private pad(str: string): string {
+  private padWithSpace(str: string): string {
     return ` ${str} `;
   }
 
-  private printPiece(piece: Piece | null): string {
+  private getPieceRepresentation(piece: Piece | null): string {
     if (!piece) return '.';
     return piece.isColor('white')
       ? piece.symbol.toUpperCase()
       : piece.symbol.toLowerCase();
   }
 
-  private printRank(rank: PosRank): string {
-    const rankStr = ` ${rank} |`;
-    const endStr = '|\n';
-    return [
-      rankStr,
-      ...files
-        .map((file) => new Position(file, rank))
-        .map(this.board.getPieceInSquare)
-        .map(this.printPiece)
-        .map(this.pad),
-      endStr,
-    ].join('');
+  private getRankRepresentation(rank: PosRank): string {
+    const rankLabel = ` ${rank} |`;
+    const endBorder = '|\n';
+    const piecesArray = files
+      .map((file) => new Position(file, rank))
+      .map(this.board.getPieceInSquare)
+      .map(this.getPieceRepresentation)
+      .map(this.padWithSpace);
+    return [rankLabel, ...piecesArray, endBorder].join('');
   }
 
-  print(): string {
+  toString(): string {
     const border = '   +------------------------+\n';
-    const filesStr = '     a  b  c  d  e  f  g  h\n';
-    return [
-      border,
-      ...ranks.slice().reverse().map(this.printRank),
-      border,
-      filesStr,
-    ].join('');
+    const fileLabels = '     a  b  c  d  e  f  g  h\n';
+    const ranksArray = ranks.slice().reverse().map(this.getRankRepresentation);
+    return [border, ...ranksArray, border, fileLabels].join('');
   }
 }
